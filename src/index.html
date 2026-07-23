@@ -26,7 +26,8 @@
       <div id="form-errors"></div>
       <form id="case-form" class="card">
         <label>Consultant(s)</label>
-        <select id="f-consultants" multiple required></select>
+        <div id="f-consultants"></div>
+        <p class="field-hint">Type to search, click to add. Remove with × or Backspace.</p>
 
         <div class="row">
           <div>
@@ -47,7 +48,8 @@
         </div>
 
         <label>Technologies</label>
-        <div id="f-tech" class="checkgroup-container"></div>
+        <div id="f-tech"></div>
+        <p class="field-hint">Type to search across all tools (Qlik, Talend, Snowflake, Azure…).</p>
 
         <div class="row">
           <div><label>Consultant role</label><input id="f-role" type="text" placeholder="e.g. Lead Qlik Developer" /></div>

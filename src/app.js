@@ -2,6 +2,7 @@ import { listCases, getCase, insertCase, updateCase } from './supabaseClient.mjs
 import { formatDuration, validateCase } from './lib/format.mjs';
 import { mdToHtml } from './lib/markdown.mjs';
 import { exportPdf, exportWord } from './export.mjs';
+import { createTagSelect } from './tagselect.mjs';
 
 const views = ['list', 'form', 'preview'];
 export function showView(name) {
@@ -53,6 +54,12 @@ export function renderPreview() {
 }
 let REF_DATA = { consultants: [], sectors: [], technologies: {} };
 let editingId = null;
+let consultantTS = null;
+let techTS = null;
+
+function techGroups() {
+  return Object.entries(REF_DATA.technologies).map(([group, items]) => ({ group, items }));
+}
 
 async function loadRefData() {
   if (REF_DATA.consultants.length) return REF_DATA;
@@ -69,38 +76,17 @@ function fillSelect(sel, values, selected = []) {
   }
 }
 
-function buildTechCheckboxes(selected = []) {
-  const host = document.getElementById('f-tech');
-  host.innerHTML = '';
-  for (const [cat, techs] of Object.entries(REF_DATA.technologies)) {
-    const block = document.createElement('div');
-    block.className = 'tech-cat';
-    block.innerHTML = `<strong>${escapeHtml(cat)}</strong><div class="checkgroup"></div>`;
-    const group = block.querySelector('.checkgroup');
-    for (const t of techs) {
-      const id = `tech-${cat}-${t}`.replace(/[^a-z0-9]/gi, '-');
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="checkbox" value="${escapeHtml(t)}" ${selected.includes(t) ? 'checked' : ''}> ${escapeHtml(t)}`;
-      label.setAttribute('for', id);
-      group.appendChild(label);
-    }
-    host.appendChild(block);
-  }
-}
-
 function readForm() {
   const g = (id) => document.getElementById(id);
-  const selected = (sel) => Array.from(sel.selectedOptions).map((o) => o.value);
-  const techs = Array.from(document.querySelectorAll('#f-tech input:checked')).map((i) => i.value);
   return {
-    consultants: selected(g('f-consultants')),
+    consultants: consultantTS ? consultantTS.getSelected() : [],
     client_name: g('f-client-name').value.trim(),
     client_confidential: g('f-confidential').checked,
     client_sector: g('f-sector').value,
     duration_start: g('f-start').value || null,
     duration_end: g('f-ongoing').checked ? null : (g('f-end').value || null),
     is_ongoing: g('f-ongoing').checked,
-    technologies: techs,
+    technologies: techTS ? techTS.getSelected() : [],
     role: g('f-role').value.trim(),
     team_size: g('f-team').value ? Number(g('f-team').value) : null,
     context_challenge: g('f-context').value.trim(),
@@ -112,7 +98,6 @@ function readForm() {
 
 function writeForm(rec = {}) {
   const g = (id) => document.getElementById(id);
-  fillSelect(g('f-consultants'), REF_DATA.consultants, rec.consultants || []);
   fillSelect(g('f-sector'), ['', ...REF_DATA.sectors], []);
   g('f-sector').value = rec.client_sector || '';
   g('f-client-name').value = rec.client_name || '';
@@ -126,7 +111,23 @@ function writeForm(rec = {}) {
   g('f-solution').value = rec.solution || '';
   g('f-results').value = rec.results || '';
   g('f-testimonial').value = rec.testimonial || '';
-  buildTechCheckboxes(rec.technologies || []);
+
+  if (!consultantTS) {
+    consultantTS = createTagSelect(g('f-consultants'), {
+      options: REF_DATA.consultants, selected: rec.consultants || [], placeholder: 'Search a consultant…',
+    });
+  } else {
+    consultantTS.setOptions(REF_DATA.consultants);
+    consultantTS.setSelected(rec.consultants || []);
+  }
+  if (!techTS) {
+    techTS = createTagSelect(g('f-tech'), {
+      options: techGroups(), selected: rec.technologies || [], placeholder: 'Search a technology…',
+    });
+  } else {
+    techTS.setOptions(techGroups());
+    techTS.setSelected(rec.technologies || []);
+  }
 }
 
 export async function openForm(rec = null) {
