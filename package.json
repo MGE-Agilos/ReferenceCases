@@ -1,0 +1,13 @@
+{
+  "name": "reference-cases",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build:refdata": "node scripts/build-reference-data.mjs"
+  },
+  "devDependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

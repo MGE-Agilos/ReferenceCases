@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agilos — Reference Cases</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="appbar">
+    <h1>Agilos · Reference Cases</h1>
+    <button id="nav-new" class="btn">+ New reference case</button>
+  </header>
+  <main>
+    <!-- LIST -->
+    <section id="view-list" class="view active">
+      <h2>Reference cases</h2>
+      <div id="list-container"><p class="muted">Loading…</p></div>
+    </section>
+
+    <!-- FORM -->
+    <section id="view-form" class="view">
+      <h2 id="form-title">New reference case</h2>
+      <div id="form-errors"></div>
+      <form id="case-form" class="card">
+        <label>Consultant(s)</label>
+        <select id="f-consultants" multiple required></select>
+
+        <div class="row">
+          <div>
+            <label>Client name</label>
+            <input id="f-client-name" type="text" />
+          </div>
+          <div>
+            <label>Client sector</label>
+            <select id="f-sector"></select>
+          </div>
+        </div>
+        <label class="checkgroup"><input id="f-confidential" type="checkbox" /> Client is confidential (anonymise)</label>
+
+        <div class="row">
+          <div><label>Start month</label><input id="f-start" type="month" /></div>
+          <div><label>End month</label><input id="f-end" type="month" /></div>
+          <div><label class="checkgroup" style="margin-top:34px"><input id="f-ongoing" type="checkbox" /> Ongoing</label></div>
+        </div>
+
+        <label>Technologies</label>
+        <div id="f-tech" class="checkgroup-container"></div>
+
+        <div class="row">
+          <div><label>Consultant role</label><input id="f-role" type="text" placeholder="e.g. Lead Qlik Developer" /></div>
+          <div><label>Team size</label><input id="f-team" type="number" min="1" /></div>
+        </div>
+
+        <label>Business context / challenge</label>
+        <textarea id="f-context"></textarea>
+        <label>Solution delivered</label>
+        <textarea id="f-solution"></textarea>
+        <label>Results / value delivered</label>
+        <textarea id="f-results"></textarea>
+        <label>Client testimonial (optional)</label>
+        <textarea id="f-testimonial"></textarea>
+
+        <div class="row" style="margin-top:16px">
+          <button type="submit" class="btn">Save</button>
+          <button type="button" id="form-cancel" class="btn secondary">Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- PREVIEW -->
+    <section id="view-preview" class="view">
+      <div class="row">
+        <button id="pv-back" class="btn secondary">← Back</button>
+        <button id="pv-generate" class="btn">Generate with AI</button>
+        <button id="pv-pdf" class="btn secondary">Export PDF</button>
+        <button id="pv-word" class="btn secondary">Export Word</button>
+      </div>
+      <div id="pv-status" class="muted"></div>
+      <div id="preview-content" class="card"></div>
+    </section>
+  </main>
+
+  <!-- Export libs (GitHub Pages has no strict CSP) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/index.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
