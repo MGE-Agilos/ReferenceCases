@@ -1,5 +1,7 @@
 import { listCases, getCase, insertCase, updateCase } from './supabaseClient.mjs';
 import { formatDuration, validateCase } from './lib/format.mjs';
+import { mdToHtml } from './lib/markdown.mjs';
+import { exportPdf, exportWord } from './export.mjs';
 
 const views = ['list', 'form', 'preview'];
 export function showView(name) {
@@ -37,7 +39,18 @@ async function renderList() {
 
 // Placeholders wired fully in later tasks:
 export async function openPreview(id) { window.__currentCase = await getCase(id); showView('preview'); renderPreview(); }
-export function renderPreview() {} // Task 12
+export function renderPreview() {
+  const c = window.__currentCase;
+  const el = document.getElementById('preview-content');
+  const status = document.getElementById('pv-status');
+  const hasText = !!c?.generated_markdown;
+  document.getElementById('pv-pdf').disabled = !hasText;
+  document.getElementById('pv-word').disabled = !hasText;
+  status.textContent = c?.status === 'generated' ? 'Generated. Review, then export.' : 'Draft — click "Generate with AI".';
+  el.innerHTML = hasText
+    ? mdToHtml(c.generated_markdown)
+    : '<p class="muted">No generated text yet.</p>';
+}
 let REF_DATA = { consultants: [], sectors: [], technologies: {} };
 let editingId = null;
 
@@ -149,5 +162,39 @@ export function escapeHtml(s) {
 document.getElementById('nav-new').addEventListener('click', () => openForm());
 document.getElementById('form-cancel').addEventListener('click', () => { showView('list'); renderList(); });
 document.getElementById('pv-back').addEventListener('click', () => { showView('list'); renderList(); });
+
+function fileBase(c) {
+  const who = c.client_confidential ? (c.client_sector || 'confidential') : (c.client_name || 'client');
+  return `reference-case-${who}`.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+}
+
+document.getElementById('pv-generate').addEventListener('click', async () => {
+  const c = window.__currentCase;
+  const status = document.getElementById('pv-status');
+  const btn = document.getElementById('pv-generate');
+  btn.disabled = true; status.textContent = 'Generating… (calling Claude)';
+  try {
+    const res = await fetch(window.APP_CONFIG.FUNCTION_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: c.id }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    window.__currentCase = { ...c, generated_markdown: data.markdown, status: 'generated' };
+    renderPreview();
+  } catch (e) {
+    status.textContent = '';
+    document.getElementById('preview-content').innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`;
+  } finally { btn.disabled = false; }
+});
+
+document.getElementById('pv-pdf').addEventListener('click', () =>
+  exportPdf(document.getElementById('preview-content'), `${fileBase(window.__currentCase)}.pdf`));
+document.getElementById('pv-word').addEventListener('click', () =>
+  exportWord(window.__currentCase.generated_markdown, `${fileBase(window.__currentCase)}.docx`));
+
+document.getElementById('pv-back').insertAdjacentHTML('afterend',
+  '<button id="pv-edit" class="btn secondary">Edit fields</button>');
+document.getElementById('pv-edit').addEventListener('click', () => openForm(window.__currentCase));
 
 renderList();
