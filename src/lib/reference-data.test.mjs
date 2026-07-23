@@ -33,7 +33,14 @@ test('groups technologies by category', () => {
   assert.deepEqual(data.technologies['Qlik'], ['Qlik Data Modeling', 'Qlik Sense Designer']);
 });
 
-test('extracts sectors as a flat list', () => {
+test('extracts matrix sectors then appends extra sectors', () => {
   const data = buildReferenceData(makeRows());
-  assert.deepEqual(data.sectors, ['Banking', 'Public']);
+  assert.deepEqual(data.sectors, ['Banking', 'Public', 'Association humanitaire']);
+});
+
+test('does not duplicate an extra sector already present in the matrix', () => {
+  const rows = makeRows();
+  rows[1][8] = 'Association humanitaire'; // matrix already lists it under Sector
+  const data = buildReferenceData(rows);
+  assert.equal(data.sectors.filter((s) => s === 'Association humanitaire').length, 1);
 });

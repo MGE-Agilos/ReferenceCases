@@ -8,6 +8,8 @@ const FIRST_TECH_COL = 5;
 const NON_TECH_CATEGORIES = new Set([
   'Sector', 'Principles', 'Dutch', 'French', 'English', 'German', 'Others',
 ]);
+// Extra sectors not present in the matrix, appended (deduped) to the sector list.
+export const EXTRA_SECTORS = ['Association humanitaire'];
 
 export function buildReferenceData(rows) {
   const categoryRow = rows[CATEGORY_ROW] || [];
@@ -43,6 +45,8 @@ export function buildReferenceData(rows) {
     if (!name || name.toUpperCase() === 'TOTAL') continue;
     consultants.push(name);
   }
+
+  for (const s of EXTRA_SECTORS) if (!sectors.includes(s)) sectors.push(s);
 
   return { consultants, sectors, technologies };
 }
