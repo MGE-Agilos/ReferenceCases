@@ -35,12 +35,12 @@ test('groups technologies by category', () => {
 
 test('extracts matrix sectors then appends extra sectors', () => {
   const data = buildReferenceData(makeRows());
-  assert.deepEqual(data.sectors, ['Banking', 'Public', 'Association humanitaire']);
+  assert.deepEqual(data.sectors, ['Banking', 'Public', 'Non-profit / NGO']);
 });
 
 test('does not duplicate an extra sector already present in the matrix', () => {
   const rows = makeRows();
-  rows[1][8] = 'Association humanitaire'; // matrix already lists it under Sector
+  rows[1][8] = 'Non-profit / NGO'; // matrix already lists it under Sector
   const data = buildReferenceData(rows);
-  assert.equal(data.sectors.filter((s) => s === 'Association humanitaire').length, 1);
+  assert.equal(data.sectors.filter((s) => s === 'Non-profit / NGO').length, 1);
 });

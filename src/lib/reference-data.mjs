@@ -9,7 +9,7 @@ const NON_TECH_CATEGORIES = new Set([
   'Sector', 'Principles', 'Dutch', 'French', 'English', 'German', 'Others',
 ]);
 // Extra sectors not present in the matrix, appended (deduped) to the sector list.
-export const EXTRA_SECTORS = ['Association humanitaire'];
+export const EXTRA_SECTORS = ['Non-profit / NGO'];
 
 export function buildReferenceData(rows) {
   const categoryRow = rows[CATEGORY_ROW] || [];
