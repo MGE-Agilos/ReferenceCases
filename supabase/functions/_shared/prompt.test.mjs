@@ -32,6 +32,6 @@ test('confidential client name is withheld and anonymisation is requested', () =
 
 test('returns model and max_tokens', () => {
   const out = buildMessages(baseRecord);
-  assert.equal(out.model, 'claude-sonnet-5');
+  assert.equal(out.model, 'claude-haiku-4-5-20251001');
   assert.ok(out.max_tokens >= 1024);
 });

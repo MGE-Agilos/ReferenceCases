@@ -6,7 +6,7 @@ client-facing write-ups (English) with Claude, exportable to PDF and Word.
 ## Architecture
 - **Front:** static HTML/CSS/ES modules in `src/`, deployed to GitHub Pages via Actions.
 - **DB:** Supabase, schema `refcases`, table `reference_cases` (see `supabase/schema.sql`).
-- **AI:** Supabase Edge Function `generate-case` calls Claude (`claude-sonnet-5`); the API key stays server-side.
+- **AI:** Supabase Edge Function `generate-case` calls Claude (`claude-haiku-4-5-20251001`); the API key stays server-side.
 - **Reference data:** `src/data/reference-data.json`, generated from `Competence martix.xlsx`.
 
 ## Setup

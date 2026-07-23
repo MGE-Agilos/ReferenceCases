@@ -31,7 +31,7 @@ en PDF et Word pour présentation à de futurs clients.
 
 ## 3. Modèle IA
 
-- **Claude Sonnet 5** (`claude-sonnet-5`) pour la rédaction. Bon rapport qualité/coût.
+- **Claude Haiku 4.5** (`claude-haiku-4-5-20251001`) pour la rédaction. Rapide et économique.
 - Langue de rédaction : **anglais uniquement**.
 
 ## 4. Champs du formulaire
