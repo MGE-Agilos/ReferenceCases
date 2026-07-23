@@ -13,11 +13,14 @@ en PDF et Word pour présentation à de futurs clients.
 
 ## 2. Architecture
 
-- **Front statique** (HTML/CSS/JS, sans build) déployé sur **GitHub Pages** (compte `checkmydev`).
+- **Front statique** (HTML/CSS/JS, sans build) déployé sur **GitHub Pages** via **GitHub Actions**,
+  compte **MGE-Agilos**, repo **ReferenceCases** (créé par l'utilisateur).
 - **Supabase** (base partagée, nouveau schéma `refcases`) pour stocker les fiches.
 - **Edge Function `generate-case`** (Deno) qui appelle l'API Claude — la clé API reste
   un secret côté serveur, jamais exposée dans le front.
 - **Génération PDF/Word côté navigateur** (aucun secret requis, pas de charge serveur).
+- **Déploiement** : workflow GitHub Actions (`.github/workflows/deploy.yml`) qui publie
+  le dossier front sur GitHub Pages à chaque push sur `main`.
 
 ```
 [Front statique GitHub Pages]
@@ -125,7 +128,32 @@ l'Edge Function → texte stocké → aperçu → export PDF/Word.
 - Clé anon Supabase dans le front (normal), protégée par RLS.
 - Fichier source `Competence martix.xlsx` non déployé (gitignore).
 
-## 11. Hors périmètre (YAGNI, v1)
+## 11. Thème visuel (inspiré de Beyond Data)
+
+Identité visuelle alignée sur https://www.beyond-data.group (marque de l'entreprise) :
+thème **clair**, **moderne, corporate et épuré**, beaucoup d'espace blanc.
+
+Palette (point de départ, à affiner en échantillonnant le site réel pendant l'implémentation) :
+
+| Rôle | Couleur | Hex |
+|------|---------|-----|
+| Fond principal | Blanc | `#FFFFFF` |
+| Fond secondaire / cartes | Gris très clair | `#F5F7FA` |
+| Primaire / titres | Bleu marine profond | `#0B1E3F` |
+| Texte courant | Gris ardoise | `#2B3440` |
+| Texte secondaire | Gris moyen | `#6B7683` |
+| Accent / CTA | Bleu | `#1D6FE0` |
+| Bordures | Gris clair | `#E2E8F0` |
+
+- **Typographie** : sans-serif moderne (Inter ou équivalent système), titres en poids
+  élevé (600–700), corps en 400.
+- **Boutons** : coins légèrement arrondis, accent bleu pour l'action primaire,
+  contour discret pour les secondaires.
+- **Composants** : cartes à bordure fine + ombre subtile, sections aérées.
+- Le même thème s'applique à l'en-tête/pied des documents PDF et Word exportés
+  (bandeau marine, titres bleu marine, accents bleus).
+
+## 12. Hors périmètre (YAGNI, v1)
 
 - Authentification par utilisateur (usage interne, clé anon + RLS suffit en v1).
 - Gestion des versions/historique des fiches.
