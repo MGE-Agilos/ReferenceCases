@@ -32,7 +32,7 @@ en PDF et Word pour présentation à de futurs clients.
 ## 3. Modèle IA
 
 - **Claude Haiku 4.5** (`claude-haiku-4-5-20251001`) pour la rédaction. Rapide et économique.
-- Langue de rédaction : **anglais uniquement**.
+- Langue de rédaction choisie par fiche : **EN / FR / NL** (défaut EN), via le champ `language`.
 
 ## 4. Champs du formulaire
 
@@ -158,4 +158,4 @@ Palette (point de départ, à affiner en échantillonnant le site réel pendant 
 - Authentification par utilisateur (usage interne, clé anon + RLS suffit en v1).
 - Gestion des versions/historique des fiches.
 - Upload de logos clients / captures d'écran.
-- Multilingue (anglais uniquement en v1).
+- Langues au-delà de EN/FR/NL (ex. allemand).

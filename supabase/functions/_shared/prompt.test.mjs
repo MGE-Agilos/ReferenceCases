@@ -35,3 +35,19 @@ test('returns model and max_tokens', () => {
   assert.equal(out.model, 'claude-haiku-4-5-20251001');
   assert.ok(out.max_tokens >= 1024);
 });
+
+test('defaults to English when no language is set', () => {
+  const { system } = buildMessages(baseRecord);
+  assert.match(system, /in English/);
+});
+
+test('generates in the requested language (French)', () => {
+  const { system } = buildMessages({ ...baseRecord, language: 'fr' });
+  assert.match(system, /in French/);
+  assert.doesNotMatch(system, /in English/);
+});
+
+test('supports Dutch', () => {
+  const { system } = buildMessages({ ...baseRecord, language: 'nl' });
+  assert.match(system, /in Dutch/);
+});

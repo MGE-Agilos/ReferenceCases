@@ -83,6 +83,7 @@ function readForm() {
     client_name: g('f-client-name').value.trim(),
     client_confidential: g('f-confidential').checked,
     client_sector: g('f-sector').value,
+    language: g('f-language').value || 'en',
     duration_start: g('f-start').value || null,
     duration_end: g('f-ongoing').checked ? null : (g('f-end').value || null),
     is_ongoing: g('f-ongoing').checked,
@@ -100,6 +101,7 @@ function writeForm(rec = {}) {
   const g = (id) => document.getElementById(id);
   fillSelect(g('f-sector'), ['', ...REF_DATA.sectors], []);
   g('f-sector').value = rec.client_sector || '';
+  g('f-language').value = rec.language || 'en';
   g('f-client-name').value = rec.client_name || '';
   g('f-confidential').checked = !!rec.client_confidential;
   g('f-start').value = rec.duration_start || '';

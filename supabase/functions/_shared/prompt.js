@@ -6,13 +6,19 @@ const SECTIONS = [
   'Technologies & Approach', 'Results / Value Delivered', 'Consultant Role',
 ];
 
+// Supported generation languages (code -> English name used in the prompt).
+export const LANGUAGES = { en: 'English', fr: 'French', nl: 'Dutch' };
+export function languageName(code) { return LANGUAGES[code] || LANGUAGES.en; }
+
 export function buildMessages(rec) {
   const confidential = !!rec.client_confidential;
+  const lang = languageName(rec.language);
   const system = [
     'You are a professional B2B consulting copywriter for Agilos, a data & analytics consultancy.',
-    'Write a polished, client-facing reference case in English from the structured facts provided.',
+    `Write a polished, client-facing reference case in ${lang} from the structured facts provided.`,
+    `Write EVERYTHING in ${lang}, including the section headings (translate them into ${lang}).`,
     'Use a confident, factual, non-boastful tone. Do not invent facts, metrics, or client names not provided.',
-    `Output GitHub-flavoured Markdown with exactly these sections as \`##\` headings, in order: ${SECTIONS.join(', ')}.`,
+    `Output GitHub-flavoured Markdown with exactly these sections as \`##\` headings, in this order: ${SECTIONS.join(', ')}.`,
     'The Title section is a single \`#\` heading line (a short, compelling project title), not a \`##\` heading.',
     confidential
       ? 'The client is CONFIDENTIAL: never state the client name. Anonymise the client by referring to them using the sector, e.g. "a leading player in the Banking sector".'
