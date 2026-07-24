@@ -1,8 +1,10 @@
-import { listCases, getCase, insertCase, updateCase } from './supabaseClient.mjs';
+import { listCases, getCase, insertCase, updateCase, uploadImage, deleteImage } from './supabaseClient.mjs';
 import { formatDuration, validateCase } from './lib/format.mjs';
 import { mdToHtml } from './lib/markdown.mjs';
 import { exportPdf, exportWord } from './export.mjs';
 import { createTagSelect } from './tagselect.mjs';
+import { validateImageFile } from './lib/image.mjs';
+import { galleryHtml } from './lib/gallery.mjs';
 
 const views = ['list', 'form', 'preview'];
 export function showView(name) {
@@ -45,20 +47,62 @@ export function renderPreview() {
   const el = document.getElementById('preview-content');
   const status = document.getElementById('pv-status');
   const hasText = !!c?.generated_markdown;
-  document.getElementById('pv-pdf').disabled = !hasText;
-  document.getElementById('pv-word').disabled = !hasText;
+  const hasImages = Array.isArray(c?.images) && c.images.length > 0;
+  const exportable = hasText || hasImages;
+  document.getElementById('pv-pdf').disabled = !exportable;
+  document.getElementById('pv-word').disabled = !exportable;
   status.textContent = c?.status === 'generated' ? 'Generated. Review, then export.' : 'Draft — click "Generate with AI".';
-  el.innerHTML = hasText
-    ? mdToHtml(c.generated_markdown)
-    : '<p class="muted">No generated text yet.</p>';
+  const body = hasText ? mdToHtml(c.generated_markdown) : '<p class="muted">No generated text yet.</p>';
+  el.innerHTML = body + galleryHtml(c?.images);
 }
 let REF_DATA = { consultants: [], sectors: [], technologies: {} };
 let editingId = null;
 let consultantTS = null;
 let techTS = null;
+let formImages = [];   // [{ path, url, caption }]
+let imageFolder = null;
 
 function techGroups() {
   return Object.entries(REF_DATA.technologies).map(([group, items]) => ({ group, items }));
+}
+
+function renderImages() {
+  const host = document.getElementById('f-images-list');
+  host.innerHTML = '';
+  formImages.forEach((img, i) => {
+    const card = document.createElement('div');
+    card.className = 'img-item';
+    card.innerHTML = `
+      <img src="${escapeHtml(img.url)}" alt="" />
+      <input type="text" class="img-caption" placeholder="Caption (optional)" value="${escapeHtml(img.caption || '')}" data-i="${i}" />
+      <button type="button" class="btn secondary img-remove" data-i="${i}">Remove</button>`;
+    host.appendChild(card);
+  });
+  host.querySelectorAll('.img-caption').forEach((inp) =>
+    inp.addEventListener('input', () => { formImages[Number(inp.dataset.i)].caption = inp.value; }));
+  host.querySelectorAll('.img-remove').forEach((b) =>
+    b.addEventListener('click', () => {
+      const [removed] = formImages.splice(Number(b.dataset.i), 1);
+      if (removed) deleteImage(removed.path);
+      renderImages();
+    }));
+}
+
+async function handleImageFiles(files) {
+  const status = document.getElementById('f-images-status');
+  for (const file of files) {
+    const err = validateImageFile({ type: file.type, size: file.size });
+    if (err) { status.innerHTML = `<span class="error">${escapeHtml(file.name)}: ${escapeHtml(err)}</span>`; continue; }
+    status.textContent = `Uploading ${file.name}…`;
+    try {
+      const { path, url } = await uploadImage(file, imageFolder);
+      formImages.push({ path, url, caption: '' });
+      renderImages();
+      status.textContent = '';
+    } catch (e) {
+      status.innerHTML = `<span class="error">${escapeHtml(e.message)}</span>`;
+    }
+  }
 }
 
 async function loadRefData() {
@@ -94,6 +138,7 @@ function readForm() {
     solution: g('f-solution').value.trim(),
     results: g('f-results').value.trim(),
     testimonial: g('f-testimonial').value.trim() || null,
+    images: [...formImages],
   };
 }
 
@@ -130,16 +175,26 @@ function writeForm(rec = {}) {
     techTS.setOptions(techGroups());
     techTS.setSelected(rec.technologies || []);
   }
+  renderImages();
 }
 
 export async function openForm(rec = null) {
   await loadRefData();
   editingId = rec?.id || null;
+  imageFolder = rec?.id || crypto.randomUUID();
+  formImages = Array.isArray(rec?.images) ? rec.images.map((i) => ({ ...i })) : [];
   document.getElementById('form-title').textContent = editingId ? 'Edit reference case' : 'New reference case';
   document.getElementById('form-errors').innerHTML = '';
+  document.getElementById('f-images-input').value = '';
+  document.getElementById('f-images-status').textContent = '';
   writeForm(rec || {});
   showView('form');
 }
+
+document.getElementById('f-images-input').addEventListener('change', (e) => {
+  handleImageFiles(Array.from(e.target.files || []));
+  e.target.value = '';
+});
 
 document.getElementById('case-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -194,7 +249,7 @@ document.getElementById('pv-generate').addEventListener('click', async () => {
 document.getElementById('pv-pdf').addEventListener('click', () =>
   exportPdf(document.getElementById('preview-content'), `${fileBase(window.__currentCase)}.pdf`));
 document.getElementById('pv-word').addEventListener('click', () =>
-  exportWord(window.__currentCase.generated_markdown, `${fileBase(window.__currentCase)}.docx`));
+  exportWord(window.__currentCase.generated_markdown, window.__currentCase.images, `${fileBase(window.__currentCase)}.docx`));
 
 document.getElementById('pv-back').insertAdjacentHTML('afterend',
   '<button id="pv-edit" class="btn secondary">Edit fields</button>');

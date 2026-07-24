@@ -157,5 +157,5 @@ Palette (point de départ, à affiner en échantillonnant le site réel pendant 
 
 - Authentification par utilisateur (usage interne, clé anon + RLS suffit en v1).
 - Gestion des versions/historique des fiches.
-- Upload de logos clients / captures d'écran.
+- URLs signées pour les images (v1 = bucket public `refcase-images`, URLs non devinables).
 - Langues au-delà de EN/FR/NL (ex. allemand).
